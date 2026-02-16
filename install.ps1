@@ -59,7 +59,8 @@ Write-Host "  Found $AppName $version" -ForegroundColor Green
 
 # ── Download ────────────────────────────────────────────────────────
 Write-Host "  [2/4] Downloading ($([math]::Round($asset.size / 1MB, 1)) MB)..." -ForegroundColor White
-$tempZip = Join-Path $env:TEMP "$AppName-install.zip"
+$tempDir = [System.IO.Path]::GetTempPath()
+$tempZip = Join-Path $tempDir "$AppName-install.zip"
 Invoke-WebRequest -Uri $downloadUrl -OutFile $tempZip -UseBasicParsing
 
 # ── Install ─────────────────────────────────────────────────────────
@@ -74,8 +75,8 @@ if (Test-Path $InstallDir) {
 }
 
 # Extract zip (contains a PDFTool/ folder inside)
-$tempExtract = Join-Path $env:TEMP "$AppName-extract"
-if (Test-Path $tempExtract) { Remove-Item $tempExtract -Recurse -Force }
+$tempExtract = Join-Path $tempDir "$AppName-extract"
+try { if (Test-Path $tempExtract) { Remove-Item $tempExtract -Recurse -Force } } catch {}
 Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
 
 # Find the PDFTool folder inside the extracted content
