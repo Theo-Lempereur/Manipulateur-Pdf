@@ -1,6 +1,6 @@
 # PDFTool
 
-A fast, lightweight CLI tool for PDF manipulation. Built in Rust, powered by Ghostscript.
+A fast, lightweight tool for PDF manipulation. Built in Rust, powered by Ghostscript. Available as a **CLI** and a **desktop GUI** (Tauri).
 
 ## Features
 
@@ -21,12 +21,33 @@ A fast, lightweight CLI tool for PDF manipulation. Built in Rust, powered by Gho
 ```bash
 git clone https://github.com/your-username/Manipulateur-Pdf.git
 cd Manipulateur-Pdf
-cargo build --release
 ```
 
-The binary will be at `target/release/pdftool.exe` (Windows) or `target/release/pdftool`.
+**CLI only:**
 
-## Usage
+```bash
+cargo build --release -p pdftool
+```
+
+Binary at `target/release/pdftool.exe` (Windows) or `target/release/pdftool`.
+
+**Desktop GUI (Tauri):**
+
+```bash
+cargo build --release -p pdftool-gui
+```
+
+Binary at `target/release/pdftool-gui.exe` (Windows).
+
+## GUI
+
+The desktop application provides a simple tabbed interface for all three operations. Output files are saved to the Downloads folder by default — just pick your input PDF, configure options, and click the action button.
+
+- Browse buttons to select input files and output directories
+- File names are entered without extension (added automatically)
+- Default output directory: Downloads folder
+
+## CLI Usage
 
 ### Extract pages
 
@@ -80,8 +101,18 @@ Output files are named `filename_001.png`, `filename_002.png`, etc.
 ## Tech Stack
 
 - **Rust** for CLI, file management, and binary generation
+- **Tauri 2** for the desktop GUI (HTML/CSS/JS frontend)
 - **Ghostscript** for all PDF operations
-- **clap** for argument parsing
+- **clap** for CLI argument parsing
+
+## Project Structure
+
+```
+pdftool-core/    # Shared library (extract, compress, convert logic)
+pdftool-cli/     # CLI binary
+src-tauri/       # Tauri GUI backend (Rust commands)
+ui/              # GUI frontend (HTML/CSS/JS)
+```
 
 ## License
 
