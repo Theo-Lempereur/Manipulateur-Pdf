@@ -1,0 +1,51 @@
+# package.ps1
+# Creates a distributable ZIP for PDFTool.
+# Run after: cargo build --release -p pdftool-gui
+#
+# Output: PDFTool-windows-x64.zip
+
+$ErrorActionPreference = "Stop"
+$projectRoot = Split-Path $PSScriptRoot
+$releaseDir  = Join-Path $projectRoot "target\release"
+$stageDir    = Join-Path $projectRoot "target\package\PDFTool"
+$zipOutput   = Join-Path $projectRoot "target\package\PDFTool-windows-x64.zip"
+
+# --- Validate ---
+$exe = Join-Path $releaseDir "pdftool-gui.exe"
+$gs  = Join-Path $releaseDir "ghostscript"
+
+if (-not (Test-Path $exe)) {
+    Write-Error "Binary not found at $exe. Run 'cargo build --release -p pdftool-gui' first."
+    exit 1
+}
+if (-not (Test-Path $gs)) {
+    Write-Error "Bundled Ghostscript not found at $gs. Run '.\scripts\setup-ghostscript.ps1' first."
+    exit 1
+}
+
+# --- Stage ---
+Write-Host "Packaging PDFTool..." -ForegroundColor Cyan
+
+if (Test-Path $stageDir) { Remove-Item $stageDir -Recurse -Force }
+New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
+
+# Copy binary (rename to PDFTool.exe for cleanliness)
+Copy-Item $exe (Join-Path $stageDir "PDFTool.exe") -Force
+
+# Copy icon
+$icon = Join-Path $projectRoot "src-tauri\icons\icon.ico"
+if (Test-Path $icon) {
+    Copy-Item $icon (Join-Path $stageDir "PDFTool.ico") -Force
+}
+
+# Copy bundled Ghostscript
+Copy-Item $gs (Join-Path $stageDir "ghostscript") -Recurse -Force
+
+# --- Zip ---
+if (Test-Path $zipOutput) { Remove-Item $zipOutput -Force }
+Compress-Archive -Path $stageDir -DestinationPath $zipOutput -CompressionLevel Optimal
+
+$sizeMB = [math]::Round((Get-Item $zipOutput).Length / 1MB, 1)
+Write-Host ""
+Write-Host "Package created: $zipOutput ($sizeMB MB)" -ForegroundColor Green
+Write-Host "Ready to upload as a GitHub Release asset." -ForegroundColor Yellow
