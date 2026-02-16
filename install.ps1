@@ -88,8 +88,8 @@ if ($extracted) {
 }
 
 # Cleanup temp files
-Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
-Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
+try { Remove-Item $tempZip -Force } catch {}
+try { Remove-Item $tempExtract -Recurse -Force } catch {}
 
 # Verify
 $exePath = Join-Path $InstallDir "PDFTool.exe"
