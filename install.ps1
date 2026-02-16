@@ -58,7 +58,8 @@ $downloadUrl = $asset.browser_download_url
 Write-Host "  Found $AppName $version" -ForegroundColor Green
 
 # ── Download ────────────────────────────────────────────────────────
-Write-Host "  [2/4] Downloading ($([math]::Round($asset.size / 1MB, 1)) MB)..." -ForegroundColor White
+$sizeMB = [math]::Round($asset.size / 1MB, 1)
+Write-Host "  [2/4] Downloading ($sizeMB MB)..." -ForegroundColor White
 $tempDir = [System.IO.Path]::GetTempPath()
 $tempZip = Join-Path $tempDir "$AppName-install.zip"
 Invoke-WebRequest -Uri $downloadUrl -OutFile $tempZip -UseBasicParsing
@@ -119,9 +120,10 @@ Write-Host ""
 Write-Host "  ✓ PDFTool $version installed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "  How to launch:" -ForegroundColor White
-Write-Host "    • Press Win, type `"PDFTool`", press Enter" -ForegroundColor DarkCyan
-Write-Host "    • Or run: $exePath" -ForegroundColor DarkGray
+Write-Host '    Press Win, type "PDFTool", press Enter' -ForegroundColor DarkCyan
+Write-Host "    Or run: $exePath" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  To uninstall later:" -ForegroundColor White
-Write-Host "    iwr https://raw.githubusercontent.com/$RepoOwner/$RepoName/main/uninstall.ps1 | iex" -ForegroundColor DarkGray
+$uninstallUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/main/uninstall.ps1"
+Write-Host "    irm $uninstallUrl | iex" -ForegroundColor DarkGray
 Write-Host ""
