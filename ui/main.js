@@ -1,5 +1,15 @@
 const { invoke } = window.__TAURI__.core;
 
+// --- Pre-fill output directories with Downloads ---
+(async function initDefaults() {
+  try {
+    const dl = await invoke('get_downloads_dir');
+    document.getElementById('extract-dir').value = dl;
+    document.getElementById('compress-dir').value = dl;
+    document.getElementById('convert-dir').value = dl;
+  } catch (_) {}
+})();
+
 // --- Tabs ---
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -11,33 +21,35 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// --- File pickers (via Rust invoke) ---
-async function pickFile(inputId) {
-  try {
-    const path = await invoke('pick_file');
-    document.getElementById(inputId).value = path;
-  } catch (_) {
-    // User cancelled
-  }
-}
+// --- File pickers (via Rust invoke, bound with addEventListener) ---
+document.querySelectorAll('.btn-browse').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const target = btn.dataset.target;
+    const kind = btn.dataset.pick;  // "file" or "dir"
+    try {
+      let path;
+      if (kind === 'file') {
+        path = await invoke('pick_file');
+      } else if (kind === 'dir') {
+        path = await invoke('pick_directory');
+      }
+      if (path) document.getElementById(target).value = path;
+    } catch (e) {
+      // User cancelled – ignore
+      console.log('picker cancelled or error:', e);
+    }
+  });
+});
 
-async function pickSave(inputId, ext) {
-  try {
-    const path = await invoke('pick_save_file', { extension: ext });
-    document.getElementById(inputId).value = path;
-  } catch (_) {
-    // User cancelled
-  }
-}
-
-async function pickDir(inputId) {
-  try {
-    const path = await invoke('pick_directory');
-    document.getElementById(inputId).value = path;
-  } catch (_) {
-    // User cancelled
-  }
-}
+// --- Action buttons ---
+document.querySelectorAll('.btn-action').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    if (action === 'extract') runExtract();
+    else if (action === 'compress') runCompress();
+    else if (action === 'convert') runConvert();
+  });
+});
 
 // --- Status ---
 function showStatus(message, type) {
@@ -66,7 +78,8 @@ function clearLoading(btn) {
 async function runExtract() {
   const input = document.getElementById('extract-input').value;
   const pages = document.getElementById('extract-pages').value;
-  const output = document.getElementById('extract-output').value;
+  const dir = document.getElementById('extract-dir').value;
+  const name = document.getElementById('extract-name').value.trim();
   const btn = document.querySelector('#extract .btn-action');
 
   if (!input) return showStatus('Please select an input PDF file.', 'error');
@@ -74,7 +87,7 @@ async function runExtract() {
 
   setLoading(btn);
   try {
-    const result = await invoke('cmd_extract', { input, pages, output });
+    const result = await invoke('cmd_extract', { input, pages, outputDir: dir, outputName: name });
     showStatus(result, 'success');
   } catch (e) {
     showStatus(e, 'error');
@@ -85,14 +98,15 @@ async function runExtract() {
 async function runCompress() {
   const input = document.getElementById('compress-input').value;
   const quality = document.getElementById('compress-quality').value;
-  const output = document.getElementById('compress-output').value;
+  const dir = document.getElementById('compress-dir').value;
+  const name = document.getElementById('compress-name').value.trim();
   const btn = document.querySelector('#compress .btn-action');
 
   if (!input) return showStatus('Please select an input PDF file.', 'error');
 
   setLoading(btn);
   try {
-    const result = await invoke('cmd_compress', { input, quality, output });
+    const result = await invoke('cmd_compress', { input, quality, outputDir: dir, outputName: name });
     showStatus(result, 'success');
   } catch (e) {
     showStatus(e, 'error');
@@ -104,14 +118,14 @@ async function runConvert() {
   const input = document.getElementById('convert-input').value;
   const format = document.getElementById('convert-format').value;
   const dpi = parseInt(document.getElementById('convert-dpi').value) || 300;
-  const output = document.getElementById('convert-output').value;
+  const dir = document.getElementById('convert-dir').value;
   const btn = document.querySelector('#convert .btn-action');
 
   if (!input) return showStatus('Please select an input PDF file.', 'error');
 
   setLoading(btn);
   try {
-    const result = await invoke('cmd_convert', { input, format, dpi, output });
+    const result = await invoke('cmd_convert', { input, format, dpi, outputDir: dir });
     showStatus(result, 'success');
   } catch (e) {
     showStatus(e, 'error');

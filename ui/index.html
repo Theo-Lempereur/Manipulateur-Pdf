@@ -25,7 +25,7 @@
         <label>Input PDF</label>
         <div class="file-row">
           <input type="text" id="extract-input" placeholder="Select a PDF file..." readonly />
-          <button class="btn-browse" onclick="pickFile('extract-input')">Browse</button>
+          <button class="btn-browse" data-pick="file" data-target="extract-input">Browse</button>
         </div>
       </div>
       <div class="field">
@@ -33,13 +33,17 @@
         <input type="text" id="extract-pages" placeholder="2-5" />
       </div>
       <div class="field">
-        <label>Output PDF <span class="hint">(optional)</span></label>
+        <label>Output directory</label>
         <div class="file-row">
-          <input type="text" id="extract-output" placeholder="Default: input_extracted.pdf" />
-          <button class="btn-browse" onclick="pickSave('extract-output', 'pdf')">Browse</button>
+          <input type="text" id="extract-dir" placeholder="Loading..." readonly />
+          <button class="btn-browse" data-pick="dir" data-target="extract-dir">Browse</button>
         </div>
       </div>
-      <button class="btn-action" onclick="runExtract()">Extract Pages</button>
+      <div class="field">
+        <label>Name <span class="hint">(optional — .pdf added automatically)</span></label>
+        <input type="text" id="extract-name" placeholder="Default: input_extracted" />
+      </div>
+      <button class="btn-action" data-action="extract">Extract Pages</button>
     </section>
 
     <!-- COMPRESS -->
@@ -48,7 +52,7 @@
         <label>Input PDF</label>
         <div class="file-row">
           <input type="text" id="compress-input" placeholder="Select a PDF file..." readonly />
-          <button class="btn-browse" onclick="pickFile('compress-input')">Browse</button>
+          <button class="btn-browse" data-pick="file" data-target="compress-input">Browse</button>
         </div>
       </div>
       <div class="field">
@@ -61,13 +65,17 @@
         </select>
       </div>
       <div class="field">
-        <label>Output PDF <span class="hint">(optional)</span></label>
+        <label>Output directory</label>
         <div class="file-row">
-          <input type="text" id="compress-output" placeholder="Default: input_compressed.pdf" />
-          <button class="btn-browse" onclick="pickSave('compress-output', 'pdf')">Browse</button>
+          <input type="text" id="compress-dir" placeholder="Loading..." readonly />
+          <button class="btn-browse" data-pick="dir" data-target="compress-dir">Browse</button>
         </div>
       </div>
-      <button class="btn-action" onclick="runCompress()">Compress PDF</button>
+      <div class="field">
+        <label>Name <span class="hint">(optional — .pdf added automatically)</span></label>
+        <input type="text" id="compress-name" placeholder="Default: input_compressed" />
+      </div>
+      <button class="btn-action" data-action="compress">Compress PDF</button>
     </section>
 
     <!-- CONVERT -->
@@ -76,7 +84,7 @@
         <label>Input PDF</label>
         <div class="file-row">
           <input type="text" id="convert-input" placeholder="Select a PDF file..." readonly />
-          <button class="btn-browse" onclick="pickFile('convert-input')">Browse</button>
+          <button class="btn-browse" data-pick="file" data-target="convert-input">Browse</button>
         </div>
       </div>
       <div class="field-row">
@@ -93,13 +101,13 @@
         </div>
       </div>
       <div class="field">
-        <label>Output directory <span class="hint">(optional)</span></label>
+        <label>Output directory</label>
         <div class="file-row">
-          <input type="text" id="convert-output" placeholder="Default: same as input" />
-          <button class="btn-browse" onclick="pickDir('convert-output')">Browse</button>
+          <input type="text" id="convert-dir" placeholder="Loading..." readonly />
+          <button class="btn-browse" data-pick="dir" data-target="convert-dir">Browse</button>
         </div>
       </div>
-      <button class="btn-action" onclick="runConvert()">Convert to Images</button>
+      <button class="btn-action" data-action="convert">Convert to Images</button>
     </section>
 
     <div id="status" class="status hidden"></div>
