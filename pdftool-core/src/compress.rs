@@ -1,13 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
-fn gs_command() -> &'static str {
-    if cfg!(target_os = "windows") {
-        "gswin64c"
-    } else {
-        "gs"
-    }
-}
+use crate::gs_command;
 
 const VALID_QUALITIES: &[&str] = &["screen", "ebook", "printer", "prepress"];
 
@@ -50,10 +44,5 @@ pub fn compress_pdf(
         .into());
     }
 
-    println!(
-        "Compressed PDF (quality: {}) saved to {}",
-        quality,
-        output.display()
-    );
     Ok(())
 }

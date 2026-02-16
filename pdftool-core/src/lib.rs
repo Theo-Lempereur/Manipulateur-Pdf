@@ -1,61 +1,17 @@
-use std::path::PathBuf;
+mod extract;
+mod compress;
+mod convert;
 
-use clap::{Parser, Subcommand};
+pub use extract::extract_pages;
+pub use compress::compress_pdf;
+pub use convert::convert_pdf;
 
-#[derive(Parser)]
-#[command(name = "pdftool", about = "CLI tool for PDF manipulation using Ghostscript")]
-pub struct Cli {
-    #[command(subcommand)]
-    pub command: Commands,
-}
-
-#[derive(Subcommand)]
-pub enum Commands {
-    /// Extract specific pages from a PDF file
-    Extract {
-        /// Input PDF file
-        input: PathBuf,
-
-        /// Page range (e.g. "2-5", "1,3,5", "1,3-5,8")
-        #[arg(short, long)]
-        pages: String,
-
-        /// Output PDF file (default: input_extracted.pdf)
-        #[arg(short, long)]
-        output: Option<PathBuf>,
-    },
-
-    /// Convert PDF pages to images
-    Convert {
-        /// Input PDF file
-        input: PathBuf,
-
-        /// Output image format: png, jpeg
-        #[arg(short, long, default_value = "png")]
-        format: String,
-
-        /// Resolution in DPI
-        #[arg(short, long, default_value = "300")]
-        dpi: u32,
-
-        /// Output directory (default: current directory)
-        #[arg(short, long)]
-        output: Option<PathBuf>,
-    },
-
-    /// Compress a PDF file
-    Compress {
-        /// Input PDF file
-        input: PathBuf,
-
-        /// Compression quality: screen, ebook, printer, prepress
-        #[arg(short, long, default_value = "ebook")]
-        quality: String,
-
-        /// Output PDF file (default: input_compressed.pdf)
-        #[arg(short, long)]
-        output: Option<PathBuf>,
-    },
+pub fn gs_command() -> &'static str {
+    if cfg!(target_os = "windows") {
+        "gswin64c"
+    } else {
+        "gs"
+    }
 }
 
 /// Parse a page range string into a sorted, deduplicated list of page numbers.

@@ -1,13 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
-fn gs_command() -> &'static str {
-    if cfg!(target_os = "windows") {
-        "gswin64c"
-    } else {
-        "gs"
-    }
-}
+use crate::gs_command;
 
 pub fn extract_pages(
     input: &Path,
@@ -44,6 +38,5 @@ pub fn extract_pages(
         .into());
     }
 
-    println!("Extracted pages [{}] to {}", page_list, output.display());
     Ok(())
 }

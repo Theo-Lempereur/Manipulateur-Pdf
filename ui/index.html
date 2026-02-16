@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDFTool</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>PDFTool</h1>
+      <p class="subtitle">PDF manipulation made simple</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="extract">Extract</button>
+      <button class="tab" data-tab="compress">Compress</button>
+      <button class="tab" data-tab="convert">Convert</button>
+    </nav>
+
+    <!-- EXTRACT -->
+    <section id="extract" class="panel active">
+      <div class="field">
+        <label>Input PDF</label>
+        <div class="file-row">
+          <input type="text" id="extract-input" placeholder="Select a PDF file..." readonly />
+          <button class="btn-browse" onclick="pickFile('extract-input')">Browse</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Pages <span class="hint">e.g. 1,3-5,8</span></label>
+        <input type="text" id="extract-pages" placeholder="2-5" />
+      </div>
+      <div class="field">
+        <label>Output PDF <span class="hint">(optional)</span></label>
+        <div class="file-row">
+          <input type="text" id="extract-output" placeholder="Default: input_extracted.pdf" readonly />
+          <button class="btn-browse" onclick="pickSave('extract-output', 'pdf')">Browse</button>
+        </div>
+      </div>
+      <button class="btn-action" onclick="runExtract()">Extract Pages</button>
+    </section>
+
+    <!-- COMPRESS -->
+    <section id="compress" class="panel">
+      <div class="field">
+        <label>Input PDF</label>
+        <div class="file-row">
+          <input type="text" id="compress-input" placeholder="Select a PDF file..." readonly />
+          <button class="btn-browse" onclick="pickFile('compress-input')">Browse</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Quality</label>
+        <select id="compress-quality">
+          <option value="screen">Screen (72 dpi) - Smallest</option>
+          <option value="ebook" selected>Ebook (150 dpi) - Balanced</option>
+          <option value="printer">Printer (300 dpi) - High</option>
+          <option value="prepress">Prepress (300 dpi) - Maximum</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Output PDF <span class="hint">(optional)</span></label>
+        <div class="file-row">
+          <input type="text" id="compress-output" placeholder="Default: input_compressed.pdf" readonly />
+          <button class="btn-browse" onclick="pickSave('compress-output', 'pdf')">Browse</button>
+        </div>
+      </div>
+      <button class="btn-action" onclick="runCompress()">Compress PDF</button>
+    </section>
+
+    <!-- CONVERT -->
+    <section id="convert" class="panel">
+      <div class="field">
+        <label>Input PDF</label>
+        <div class="file-row">
+          <input type="text" id="convert-input" placeholder="Select a PDF file..." readonly />
+          <button class="btn-browse" onclick="pickFile('convert-input')">Browse</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Format</label>
+          <select id="convert-format">
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>DPI</label>
+          <input type="number" id="convert-dpi" value="300" min="72" max="600" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Output directory <span class="hint">(optional)</span></label>
+        <div class="file-row">
+          <input type="text" id="convert-output" placeholder="Default: same as input" readonly />
+          <button class="btn-browse" onclick="pickDir('convert-output')">Browse</button>
+        </div>
+      </div>
+      <button class="btn-action" onclick="runConvert()">Convert to Images</button>
+    </section>
+
+    <div id="status" class="status hidden"></div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,13 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
-fn gs_command() -> &'static str {
-    if cfg!(target_os = "windows") {
-        "gswin64c"
-    } else {
-        "gs"
-    }
-}
+use crate::gs_command;
 
 fn gs_device(format: &str) -> Result<&'static str, String> {
     match format {
@@ -66,11 +60,5 @@ pub fn convert_pdf(
         .into());
     }
 
-    println!(
-        "Converted PDF to {} images ({}dpi) in {}",
-        format,
-        dpi,
-        output_dir.display()
-    );
     Ok(())
 }
