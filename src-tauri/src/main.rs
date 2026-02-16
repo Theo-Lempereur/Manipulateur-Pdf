@@ -8,35 +8,41 @@ fn downloads_dir() -> PathBuf {
 }
 
 #[tauri::command]
-fn pick_file() -> Result<String, String> {
-    let file = rfd::FileDialog::new()
+async fn pick_file(window: tauri::Window) -> Result<String, String> {
+    let handle = rfd::AsyncFileDialog::new()
+        .set_parent(&window)
         .add_filter("PDF", &["pdf"])
-        .pick_file();
-    match file {
-        Some(path) => Ok(path.display().to_string()),
+        .pick_file()
+        .await;
+    match handle {
+        Some(h) => Ok(h.path().display().to_string()),
         None => Err("No file selected".to_string()),
     }
 }
 
 #[tauri::command]
-fn pick_save_file(extension: String) -> Result<String, String> {
-    let file = rfd::FileDialog::new()
+async fn pick_save_file(window: tauri::Window, extension: String) -> Result<String, String> {
+    let handle = rfd::AsyncFileDialog::new()
+        .set_parent(&window)
         .set_directory(downloads_dir())
         .add_filter(&extension.to_uppercase(), &[&extension])
-        .save_file();
-    match file {
-        Some(path) => Ok(path.display().to_string()),
+        .save_file()
+        .await;
+    match handle {
+        Some(h) => Ok(h.path().display().to_string()),
         None => Err("No file selected".to_string()),
     }
 }
 
 #[tauri::command]
-fn pick_directory() -> Result<String, String> {
-    let dir = rfd::FileDialog::new()
+async fn pick_directory(window: tauri::Window) -> Result<String, String> {
+    let handle = rfd::AsyncFileDialog::new()
+        .set_parent(&window)
         .set_directory(downloads_dir())
-        .pick_folder();
-    match dir {
-        Some(path) => Ok(path.display().to_string()),
+        .pick_folder()
+        .await;
+    match handle {
+        Some(h) => Ok(h.path().display().to_string()),
         None => Err("No directory selected".to_string()),
     }
 }
