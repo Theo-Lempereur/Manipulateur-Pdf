@@ -3,13 +3,55 @@
 use std::path::PathBuf;
 use pdftool_core::{compress_pdf, convert_pdf, extract_pages, parse_page_range};
 
+fn downloads_dir() -> PathBuf {
+    dirs::download_dir().unwrap_or_else(|| PathBuf::from("."))
+}
+
+#[tauri::command]
+fn pick_file() -> Result<String, String> {
+    let file = rfd::FileDialog::new()
+        .add_filter("PDF", &["pdf"])
+        .pick_file();
+    match file {
+        Some(path) => Ok(path.display().to_string()),
+        None => Err("No file selected".to_string()),
+    }
+}
+
+#[tauri::command]
+fn pick_save_file(extension: String) -> Result<String, String> {
+    let file = rfd::FileDialog::new()
+        .set_directory(downloads_dir())
+        .add_filter(&extension.to_uppercase(), &[&extension])
+        .save_file();
+    match file {
+        Some(path) => Ok(path.display().to_string()),
+        None => Err("No file selected".to_string()),
+    }
+}
+
+#[tauri::command]
+fn pick_directory() -> Result<String, String> {
+    let dir = rfd::FileDialog::new()
+        .set_directory(downloads_dir())
+        .pick_folder();
+    match dir {
+        Some(path) => Ok(path.display().to_string()),
+        None => Err("No directory selected".to_string()),
+    }
+}
+
+#[tauri::command]
+fn get_downloads_dir() -> String {
+    downloads_dir().display().to_string()
+}
+
 #[tauri::command]
 fn cmd_extract(input: String, pages: String, output: String) -> Result<String, String> {
     let input = PathBuf::from(&input);
     let output = if output.is_empty() {
         let stem = input.file_stem().unwrap_or_default().to_string_lossy();
-        let parent = input.parent().unwrap_or_else(|| std::path::Path::new("."));
-        parent.join(format!("{}_extracted.pdf", stem))
+        downloads_dir().join(format!("{}_extracted.pdf", stem))
     } else {
         PathBuf::from(&output)
     };
@@ -25,8 +67,7 @@ fn cmd_compress(input: String, quality: String, output: String) -> Result<String
     let input = PathBuf::from(&input);
     let output = if output.is_empty() {
         let stem = input.file_stem().unwrap_or_default().to_string_lossy();
-        let parent = input.parent().unwrap_or_else(|| std::path::Path::new("."));
-        parent.join(format!("{}_compressed.pdf", stem))
+        downloads_dir().join(format!("{}_compressed.pdf", stem))
     } else {
         PathBuf::from(&output)
     };
@@ -40,7 +81,7 @@ fn cmd_compress(input: String, quality: String, output: String) -> Result<String
 fn cmd_convert(input: String, format: String, dpi: u32, output: String) -> Result<String, String> {
     let input = PathBuf::from(&input);
     let output_dir = if output.is_empty() {
-        input.parent().unwrap_or_else(|| std::path::Path::new(".")).to_path_buf()
+        downloads_dir()
     } else {
         PathBuf::from(&output)
     };
@@ -52,9 +93,16 @@ fn cmd_convert(input: String, format: String, dpi: u32, output: String) -> Resul
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![cmd_extract, cmd_compress, cmd_convert])
+        .invoke_handler(tauri::generate_handler![
+            pick_file,
+            pick_save_file,
+            pick_directory,
+            get_downloads_dir,
+            cmd_extract,
+            cmd_compress,
+            cmd_convert,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

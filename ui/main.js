@@ -1,5 +1,4 @@
 const { invoke } = window.__TAURI__.core;
-const { open, save } = window.__TAURI__.dialog;
 
 // --- Tabs ---
 document.querySelectorAll('.tab').forEach(tab => {
@@ -12,30 +11,31 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// --- File pickers ---
+// --- File pickers (via Rust invoke) ---
 async function pickFile(inputId) {
-  const path = await open({
-    filters: [{ name: 'PDF', extensions: ['pdf'] }],
-    multiple: false,
-  });
-  if (path) {
+  try {
+    const path = await invoke('pick_file');
     document.getElementById(inputId).value = path;
+  } catch (_) {
+    // User cancelled
   }
 }
 
 async function pickSave(inputId, ext) {
-  const path = await save({
-    filters: [{ name: ext.toUpperCase(), extensions: [ext] }],
-  });
-  if (path) {
+  try {
+    const path = await invoke('pick_save_file', { extension: ext });
     document.getElementById(inputId).value = path;
+  } catch (_) {
+    // User cancelled
   }
 }
 
 async function pickDir(inputId) {
-  const path = await open({ directory: true });
-  if (path) {
+  try {
+    const path = await invoke('pick_directory');
     document.getElementById(inputId).value = path;
+  } catch (_) {
+    // User cancelled
   }
 }
 
