@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use crate::gs_command;
+use crate::{gs_command, gs_lib_path};
 
 fn gs_device(format: &str) -> Result<&'static str, String> {
     match format {
@@ -40,7 +40,19 @@ pub fn convert_pdf(
         .display()
         .to_string();
 
-    let status = Command::new(gs_command())
+    let mut cmd = Command::new(gs_command());
+
+    if let Some(gs_dir) = gs_lib_path() {
+        let search_path = format!(
+            "{};{};{}",
+            gs_dir.join("lib").display(),
+            gs_dir.join("Resource").display(),
+            gs_dir.join("iccprofiles").display(),
+        );
+        cmd.env("GS_LIB", &search_path);
+    }
+
+    let status = cmd
         .args([
             &format!("-sDEVICE={}", device),
             &format!("-r{}", dpi),

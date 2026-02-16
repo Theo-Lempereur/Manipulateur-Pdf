@@ -12,9 +12,14 @@ A fast, lightweight tool for PDF manipulation. Built in Rust, powered by Ghostsc
 
 ### Prerequisites
 
+**For CLI tool:**
 - [Ghostscript](https://www.ghostscript.com/releases/gsdnld.html) must be installed and available in your PATH
   - Windows: `gswin64c --version`
   - Linux/macOS: `gs --version`
+
+**For GUI app (bundled):**
+- Ghostscript is **bundled** with the GUI — end users don't need to install it
+- Developers building from source need Ghostscript installed to setup the bundle (see below)
 
 ### Build from source
 
@@ -31,13 +36,21 @@ cargo build --release -p pdftool
 
 Binary at `target/release/pdftool.exe` (Windows) or `target/release/pdftool`.
 
-**Desktop GUI (Tauri):**
+**Desktop GUI (Tauri with bundled Ghostscript):**
 
-```bash
-cargo build --release -p pdftool-gui
-```
+1. Install Ghostscript on the **build machine** (if not already installed)
+2. Run the setup script to bundle Ghostscript files:
+   ```powershell
+   .\scripts\setup-ghostscript.ps1
+   ```
+3. Build the GUI:
+   ```bash
+   cargo build --release -p pdftool-gui
+   ```
 
-Binary at `target/release/pdftool-gui.exe` (Windows).
+Binary at `target/release/pdftool-gui.exe`. The bundled Ghostscript is automatically copied to `target/release/ghostscript/` during build.
+
+> **Note:** The `ghostscript/` folder (~43 MB) is excluded from Git. Each developer must run the setup script once after cloning.
 
 ## GUI
 

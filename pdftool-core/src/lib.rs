@@ -6,12 +6,43 @@ pub use extract::extract_pages;
 pub use compress::compress_pdf;
 pub use convert::convert_pdf;
 
-pub fn gs_command() -> &'static str {
+use std::path::PathBuf;
+
+/// Return the path to the Ghostscript executable.
+/// Priority:
+/// 1. Bundled GS next to the current executable (ghostscript/bin/gswin64c.exe)
+/// 2. System-installed GS in PATH
+pub fn gs_command() -> String {
     if cfg!(target_os = "windows") {
-        "gswin64c"
+        // Look for bundled Ghostscript next to our executable
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(exe_dir) = exe.parent() {
+                let bundled = exe_dir.join("ghostscript").join("bin").join("gswin64c.exe");
+                if bundled.exists() {
+                    return bundled.to_string_lossy().to_string();
+                }
+            }
+        }
+        "gswin64c".to_string()
     } else {
-        "gs"
+        "gs".to_string()
     }
+}
+
+/// Return the path to the bundled GS lib directory, if it exists.
+/// Ghostscript needs this to find its init files.
+pub fn gs_lib_path() -> Option<PathBuf> {
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(exe_dir) = exe.parent() {
+            let gs_dir = exe_dir.join("ghostscript");
+            let lib_dir = gs_dir.join("lib");
+            let res_dir = gs_dir.join("Resource");
+            if lib_dir.exists() && res_dir.exists() {
+                return Some(gs_dir);
+            }
+        }
+    }
+    None
 }
 
 /// Parse a page range string into a sorted, deduplicated list of page numbers.

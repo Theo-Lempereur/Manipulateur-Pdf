@@ -1,5 +1,8 @@
 /target
 
+# Bundled Ghostscript (too large for Git, see scripts/setup-ghostscript.ps1)
+/ghostscript/
+
 # Test & output files
 /output/
 /images/
