@@ -1,0 +1,7 @@
+/target
+
+# Test & output files
+/output/
+/images/
+/images_jpeg/
+*.pdf
