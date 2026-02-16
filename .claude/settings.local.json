@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo init:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(git add:*)",
+      "Bash(git rm:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "upstash/context7"
+  ]
+}
