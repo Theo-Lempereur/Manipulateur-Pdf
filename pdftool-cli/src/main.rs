@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::process;
 
 use clap::{Parser, Subcommand};
-use pdftool_core::{compress_pdf, convert_pdf, extract_pages, parse_page_range};
+use pdftool_core::{compress_pdf, convert_pdf, extract_pages, extract_text, parse_page_range};
 
 #[derive(Parser)]
 #[command(name = "pdftool", about = "CLI tool for PDF manipulation using Ghostscript")]
@@ -35,6 +35,14 @@ enum Commands {
         #[arg(short, long, default_value = "300")]
         dpi: u32,
         /// Output directory (default: current directory)
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
+    /// Extract text content from a PDF to a text file
+    Text {
+        /// Input PDF file
+        input: PathBuf,
+        /// Output text file (default: input.txt)
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
@@ -79,6 +87,20 @@ fn main() {
                 process::exit(1);
             }
             println!("Extracted pages to {}", output.display());
+        }
+
+        Commands::Text { input, output } => {
+            let output = output.unwrap_or_else(|| {
+                let stem = input.file_stem().unwrap_or_default().to_string_lossy();
+                let parent = input.parent().unwrap_or_else(|| std::path::Path::new("."));
+                parent.join(format!("{}.txt", stem))
+            });
+
+            if let Err(e) = extract_text(&input, &output) {
+                eprintln!("Error: {}", e);
+                process::exit(1);
+            }
+            println!("Text extracted to {}", output.display());
         }
 
         Commands::Compress {
