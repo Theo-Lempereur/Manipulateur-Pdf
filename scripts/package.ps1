@@ -41,6 +41,15 @@ if (Test-Path $icon) {
 # Copy bundled Ghostscript
 Copy-Item $gs (Join-Path $stageDir "ghostscript") -Recurse -Force
 
+# Copy bundled Pandoc+Typst (if available)
+$pandoc = Join-Path $releaseDir "pandoc"
+if (Test-Path $pandoc) {
+    Copy-Item $pandoc (Join-Path $stageDir "pandoc") -Recurse -Force
+    Write-Host "  Pandoc+Typst bundle included" -ForegroundColor Green
+} else {
+    Write-Host "  Warning: Pandoc+Typst bundle not found. Markdown->PDF won't work standalone." -ForegroundColor Yellow
+}
+
 # --- Zip ---
 if (Test-Path $zipOutput) { Remove-Item $zipOutput -Force }
 Compress-Archive -Path $stageDir -DestinationPath $zipOutput -CompressionLevel Optimal

@@ -48,5 +48,31 @@ fn main() {
         println!("cargo:warning=✓ Ghostscript bundled to {}", gs_dst.display());
     }
 
+    // --- Bundle Pandoc + Typst ---
+    let pandoc_src = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("pandoc");
+
+    if !pandoc_src.exists() {
+        println!("cargo:warning=");
+        println!("cargo:warning=╔═══════════════════════════════════════════════════════════════════╗");
+        println!("cargo:warning=║ Pandoc/Typst bundle not found!                                   ║");
+        println!("cargo:warning=║                                                                   ║");
+        println!("cargo:warning=║ To bundle Pandoc+Typst for Markdown→PDF, run:                    ║");
+        println!("cargo:warning=║   .\\scripts\\setup-pandoc.ps1                                     ║");
+        println!("cargo:warning=║                                                                   ║");
+        println!("cargo:warning=║ The app will still work if Pandoc/Typst are installed system-wide.║");
+        println!("cargo:warning=╚═══════════════════════════════════════════════════════════════════╝");
+        println!("cargo:warning=");
+    } else {
+        let out_dir = std::env::var("OUT_DIR").unwrap();
+        let target_dir = Path::new(&out_dir)
+            .ancestors()
+            .nth(3)
+            .unwrap()
+            .to_path_buf();
+        let pandoc_dst = target_dir.join("pandoc");
+        copy_dir_recursive(&pandoc_src, &pandoc_dst);
+        println!("cargo:warning=✓ Pandoc+Typst bundled to {}", pandoc_dst.display());
+    }
+
     tauri_build::build()
 }

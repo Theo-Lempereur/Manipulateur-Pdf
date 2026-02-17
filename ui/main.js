@@ -29,7 +29,8 @@ document.querySelectorAll('.btn-browse').forEach(btn => {
     try {
       let path;
       if (kind === 'file') {
-        path = await invoke('pick_file');
+        const filter = btn.dataset.filter || null;
+        path = await invoke('pick_file', { filter });
       } else if (kind === 'dir') {
         path = await invoke('pick_directory');
       }
@@ -59,6 +60,35 @@ document.getElementById('extract-mode').addEventListener('change', (e) => {
   }
 });
 
+// --- Convert mode toggle ---
+document.getElementById('convert-mode').addEventListener('change', (e) => {
+  const mode = e.target.value;
+  const imageOptions = document.getElementById('convert-image-options');
+  const nameField = document.getElementById('convert-name-field');
+  const inputLabel = document.getElementById('convert-input-label');
+  const inputEl = document.getElementById('convert-input');
+  const browseBtn = document.getElementById('convert-browse-btn');
+  const actionBtn = document.querySelector('#convert .btn-action');
+
+  if (mode === 'md-to-pdf') {
+    imageOptions.style.display = 'none';
+    nameField.style.display = '';
+    inputLabel.textContent = 'Input Markdown';
+    inputEl.placeholder = 'Select a Markdown file...';
+    inputEl.value = '';
+    browseBtn.dataset.filter = 'md';
+    actionBtn.textContent = 'Convert to PDF';
+  } else {
+    imageOptions.style.display = '';
+    nameField.style.display = 'none';
+    inputLabel.textContent = 'Input PDF';
+    inputEl.placeholder = 'Select a PDF file...';
+    inputEl.value = '';
+    delete browseBtn.dataset.filter;
+    actionBtn.textContent = 'Convert to Images';
+  }
+});
+
 // --- Action buttons ---
 document.querySelectorAll('.btn-action').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -69,7 +99,11 @@ document.querySelectorAll('.btn-action').forEach(btn => {
       else runExtract();
     }
     else if (action === 'compress') runCompress();
-    else if (action === 'convert') runConvert();
+    else if (action === 'convert') {
+      const mode = document.getElementById('convert-mode').value;
+      if (mode === 'md-to-pdf') runMdToPdf();
+      else runConvert();
+    }
   });
 });
 
@@ -166,6 +200,24 @@ async function runConvert() {
   setLoading(btn);
   try {
     const result = await invoke('cmd_convert', { input, format, dpi, outputDir: dir });
+    showStatus(result, 'success');
+  } catch (e) {
+    showStatus(e, 'error');
+  }
+  clearLoading(btn);
+}
+
+async function runMdToPdf() {
+  const input = document.getElementById('convert-input').value;
+  const dir = document.getElementById('convert-dir').value;
+  const name = document.getElementById('convert-name').value.trim();
+  const btn = document.querySelector('#convert .btn-action');
+
+  if (!input) return showStatus('Please select a Markdown file.', 'error');
+
+  setLoading(btn);
+  try {
+    const result = await invoke('cmd_md_to_pdf', { input, outputDir: dir, outputName: name });
     showStatus(result, 'success');
   } catch (e) {
     showStatus(e, 'error');
