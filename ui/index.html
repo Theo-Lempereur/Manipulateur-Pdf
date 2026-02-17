@@ -88,23 +88,32 @@
     <!-- CONVERT -->
     <section id="convert" class="panel">
       <div class="field">
-        <label>Input PDF</label>
+        <label>Mode</label>
+        <select id="convert-mode">
+          <option value="pdf-to-images">PDF → Images</option>
+          <option value="md-to-pdf">Markdown → PDF</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="convert-input-label">Input PDF</label>
         <div class="file-row">
           <input type="text" id="convert-input" placeholder="Select a PDF file..." readonly />
-          <button class="btn-browse" data-pick="file" data-target="convert-input">Browse</button>
+          <button class="btn-browse" id="convert-browse-btn" data-pick="file" data-target="convert-input">Browse</button>
         </div>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Format</label>
-          <select id="convert-format">
-            <option value="png">PNG</option>
-            <option value="jpeg">JPEG</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>DPI</label>
-          <input type="number" id="convert-dpi" value="300" min="72" max="600" />
+      <div id="convert-image-options">
+        <div class="field-row">
+          <div class="field">
+            <label>Format</label>
+            <select id="convert-format">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>DPI</label>
+            <input type="number" id="convert-dpi" value="300" min="72" max="600" />
+          </div>
         </div>
       </div>
       <div class="field">
@@ -113,6 +122,10 @@
           <input type="text" id="convert-dir" placeholder="Loading..." readonly />
           <button class="btn-browse" data-pick="dir" data-target="convert-dir">Browse</button>
         </div>
+      </div>
+      <div class="field" id="convert-name-field" style="display:none">
+        <label>Name <span class="hint">(optional — .pdf added automatically)</span></label>
+        <input type="text" id="convert-name" placeholder="Default: input" />
       </div>
       <button class="btn-action" data-action="convert">Convert to Images</button>
     </section>

@@ -3,6 +3,9 @@
 # Bundled Ghostscript (too large for Git, see scripts/setup-ghostscript.ps1)
 /ghostscript/
 
+# Bundled Pandoc+Typst (too large for Git, see scripts/setup-pandoc.ps1)
+/pandoc/
+
 # Test & output files
 /output/
 /images/
