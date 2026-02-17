@@ -78,6 +78,14 @@ document.getElementById('convert-mode').addEventListener('change', (e) => {
     inputEl.value = '';
     browseBtn.dataset.filter = 'md';
     actionBtn.textContent = 'Convert to PDF';
+  } else if (mode === 'pdf-to-md') {
+    imageOptions.style.display = 'none';
+    nameField.style.display = '';
+    inputLabel.textContent = 'Input PDF';
+    inputEl.placeholder = 'Select a PDF file...';
+    inputEl.value = '';
+    delete browseBtn.dataset.filter;
+    actionBtn.textContent = 'Convert to Markdown';
   } else {
     imageOptions.style.display = '';
     nameField.style.display = 'none';
@@ -102,6 +110,7 @@ document.querySelectorAll('.btn-action').forEach(btn => {
     else if (action === 'convert') {
       const mode = document.getElementById('convert-mode').value;
       if (mode === 'md-to-pdf') runMdToPdf();
+      else if (mode === 'pdf-to-md') runPdfToMd();
       else runConvert();
     }
   });
@@ -200,6 +209,24 @@ async function runConvert() {
   setLoading(btn);
   try {
     const result = await invoke('cmd_convert', { input, format, dpi, outputDir: dir });
+    showStatus(result, 'success');
+  } catch (e) {
+    showStatus(e, 'error');
+  }
+  clearLoading(btn);
+}
+
+async function runPdfToMd() {
+  const input = document.getElementById('convert-input').value;
+  const dir = document.getElementById('convert-dir').value;
+  const name = document.getElementById('convert-name').value.trim();
+  const btn = document.querySelector('#convert .btn-action');
+
+  if (!input) return showStatus('Please select a PDF file.', 'error');
+
+  setLoading(btn);
+  try {
+    const result = await invoke('cmd_pdf_to_md', { input, outputDir: dir, outputName: name });
     showStatus(result, 'success');
   } catch (e) {
     showStatus(e, 'error');
