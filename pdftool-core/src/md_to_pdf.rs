@@ -129,13 +129,29 @@ pub fn md_to_pdf(
 
     let engine = find_pdf_engine()?;
 
+    let is_typst = engine.contains("typst");
+
+    let mut args = vec![
+        input.display().to_string(),
+        "-o".to_string(),
+        output.display().to_string(),
+        format!("--pdf-engine={}", engine),
+    ];
+
+    // For typst: reduce margins and font size for better table rendering
+    if is_typst {
+        args.extend([
+            "-V".to_string(), "margin-top=1.5cm".to_string(),
+            "-V".to_string(), "margin-bottom=1.5cm".to_string(),
+            "-V".to_string(), "margin-left=1.5cm".to_string(),
+            "-V".to_string(), "margin-right=1.5cm".to_string(),
+            "-V".to_string(), "fontsize=10pt".to_string(),
+            "-V".to_string(), "papersize=a4".to_string(),
+        ]);
+    }
+
     let status = Command::new(pandoc_command())
-        .args([
-            &input.display().to_string(),
-            "-o",
-            &output.display().to_string(),
-            &format!("--pdf-engine={}", engine),
-        ])
+        .args(&args)
         .status()?;
 
     if !status.success() {
