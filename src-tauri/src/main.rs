@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::path::PathBuf;
-use pdftool_core::{compress_pdf, convert_pdf, extract_pages, parse_page_range};
+use pdftool_core::{compress_pdf, convert_pdf, extract_pages, extract_text, parse_page_range};
 
 fn downloads_dir() -> PathBuf {
     dirs::download_dir().unwrap_or_else(|| PathBuf::from("."))
@@ -67,6 +67,23 @@ fn cmd_extract(input: String, pages: String, output_dir: String, output_name: St
 }
 
 #[tauri::command]
+fn cmd_extract_text(input: String, output_dir: String, output_name: String) -> Result<String, String> {
+    let input = PathBuf::from(&input);
+    let dir = if output_dir.is_empty() { downloads_dir() } else { PathBuf::from(&output_dir) };
+    let name = if output_name.is_empty() {
+        let stem = input.file_stem().unwrap_or_default().to_string_lossy();
+        stem.to_string()
+    } else {
+        strip_extension(&output_name)
+    };
+    let output = dir.join(format!("{}.txt", name));
+
+    extract_text(&input, &output).map_err(|e| e.to_string())?;
+
+    Ok(format!("Text extracted to {}", output.display()))
+}
+
+#[tauri::command]
 fn cmd_compress(input: String, quality: String, output_dir: String, output_name: String) -> Result<String, String> {
     let input = PathBuf::from(&input);
     let dir = if output_dir.is_empty() { downloads_dir() } else { PathBuf::from(&output_dir) };
@@ -101,6 +118,7 @@ fn main() {
             pick_directory,
             get_downloads_dir,
             cmd_extract,
+            cmd_extract_text,
             cmd_compress,
             cmd_convert,
         ])

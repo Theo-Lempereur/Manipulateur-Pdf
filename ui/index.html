@@ -22,13 +22,20 @@
     <!-- EXTRACT -->
     <section id="extract" class="panel active">
       <div class="field">
+        <label>Mode</label>
+        <select id="extract-mode">
+          <option value="pages">Extract Pages</option>
+          <option value="text">Extract Text (PDF → TXT)</option>
+        </select>
+      </div>
+      <div class="field">
         <label>Input PDF</label>
         <div class="file-row">
           <input type="text" id="extract-input" placeholder="Select a PDF file..." readonly />
           <button class="btn-browse" data-pick="file" data-target="extract-input">Browse</button>
         </div>
       </div>
-      <div class="field">
+      <div class="field" id="extract-pages-field">
         <label>Pages <span class="hint">e.g. 1,3-5,8</span></label>
         <input type="text" id="extract-pages" placeholder="2-5" />
       </div>
@@ -40,7 +47,7 @@
         </div>
       </div>
       <div class="field">
-        <label>Name <span class="hint">(optional — .pdf added automatically)</span></label>
+        <label>Name <span class="hint" id="extract-name-hint">(optional — .pdf added automatically)</span></label>
         <input type="text" id="extract-name" placeholder="Default: input_extracted" />
       </div>
       <button class="btn-action" data-action="extract">Extract Pages</button>

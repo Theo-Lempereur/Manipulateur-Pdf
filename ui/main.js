@@ -41,11 +41,33 @@ document.querySelectorAll('.btn-browse').forEach(btn => {
   });
 });
 
+// --- Extract mode toggle ---
+document.getElementById('extract-mode').addEventListener('change', (e) => {
+  const mode = e.target.value;
+  const pagesField = document.getElementById('extract-pages-field');
+  const nameHint = document.getElementById('extract-name-hint');
+  const actionBtn = document.querySelector('#extract .btn-action');
+
+  if (mode === 'text') {
+    pagesField.style.display = 'none';
+    nameHint.textContent = '(optional — .txt added automatically)';
+    actionBtn.textContent = 'Extract Text';
+  } else {
+    pagesField.style.display = '';
+    nameHint.textContent = '(optional — .pdf added automatically)';
+    actionBtn.textContent = 'Extract Pages';
+  }
+});
+
 // --- Action buttons ---
 document.querySelectorAll('.btn-action').forEach(btn => {
   btn.addEventListener('click', () => {
     const action = btn.dataset.action;
-    if (action === 'extract') runExtract();
+    if (action === 'extract') {
+      const mode = document.getElementById('extract-mode').value;
+      if (mode === 'text') runExtractText();
+      else runExtract();
+    }
     else if (action === 'compress') runCompress();
     else if (action === 'convert') runConvert();
   });
@@ -88,6 +110,24 @@ async function runExtract() {
   setLoading(btn);
   try {
     const result = await invoke('cmd_extract', { input, pages, outputDir: dir, outputName: name });
+    showStatus(result, 'success');
+  } catch (e) {
+    showStatus(e, 'error');
+  }
+  clearLoading(btn);
+}
+
+async function runExtractText() {
+  const input = document.getElementById('extract-input').value;
+  const dir = document.getElementById('extract-dir').value;
+  const name = document.getElementById('extract-name').value.trim();
+  const btn = document.querySelector('#extract .btn-action');
+
+  if (!input) return showStatus('Please select an input PDF file.', 'error');
+
+  setLoading(btn);
+  try {
+    const result = await invoke('cmd_extract_text', { input, outputDir: dir, outputName: name });
     showStatus(result, 'success');
   } catch (e) {
     showStatus(e, 'error');
