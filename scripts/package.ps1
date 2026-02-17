@@ -50,6 +50,24 @@ if (Test-Path $pandoc) {
     Write-Host "  Warning: Pandoc+Typst bundle not found. Markdown->PDF won't work standalone." -ForegroundColor Yellow
 }
 
+# Copy pdftotext + required DLLs (for text extraction & PDF->Markdown)
+$pdftextSrc = "C:\Program Files\Git\mingw64\bin\pdftotext.exe"
+if (Test-Path $pdftextSrc) {
+    Copy-Item $pdftextSrc (Join-Path $stageDir "pdftotext.exe") -Force
+    # Copy required mingw64 DLLs
+    $dllDir = "C:\Program Files\Git\mingw64\bin"
+    $dlls = @("libgcc_s_seh-1.dll", "libstdc++-6.dll", "libwinpthread-1.dll", "zlib1.dll")
+    foreach ($dll in $dlls) {
+        $dllPath = Join-Path $dllDir $dll
+        if (Test-Path $dllPath) {
+            Copy-Item $dllPath (Join-Path $stageDir $dll) -Force
+        }
+    }
+    Write-Host "  pdftotext + DLLs included" -ForegroundColor Green
+} else {
+    Write-Host "  Warning: pdftotext not found. Text extraction & PDF->Markdown won't work standalone." -ForegroundColor Yellow
+}
+
 # --- Zip ---
 if (Test-Path $zipOutput) { Remove-Item $zipOutput -Force }
 Compress-Archive -Path $stageDir -DestinationPath $zipOutput -CompressionLevel Optimal

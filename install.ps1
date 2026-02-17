@@ -36,6 +36,16 @@ Write-Host "  ║                                           ║" -ForegroundColo
 Write-Host "  ╚═══════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
+# ── Detect install vs update ──────────────────────────────────────
+$isUpdate = Test-Path $InstallDir
+$currentVersion = $null
+if ($isUpdate) {
+    $versionFile = Join-Path $InstallDir "version.txt"
+    if (Test-Path $versionFile) {
+        $currentVersion = (Get-Content $versionFile -Raw).Trim()
+    }
+}
+
 # ── Find latest release ────────────────────────────────────────────
 Write-Host "  [1/4] Finding latest release..." -ForegroundColor White
 $apiUrl  = "https://api.github.com/repos/$RepoOwner/$RepoName/releases/latest"
@@ -55,7 +65,16 @@ if (-not $asset) {
 
 $version     = $release.tag_name
 $downloadUrl = $asset.browser_download_url
-Write-Host "  Found $AppName $version" -ForegroundColor Green
+if ($isUpdate -and $currentVersion -eq $version) {
+    Write-Host "  $AppName $version is already installed. Nothing to do." -ForegroundColor Green
+    Write-Host ""
+    exit 0
+}
+if ($isUpdate) {
+    Write-Host "  Updating $AppName $currentVersion -> $version" -ForegroundColor Green
+} else {
+    Write-Host "  Found $AppName $version" -ForegroundColor Green
+}
 
 # ── Download ────────────────────────────────────────────────────────
 $sizeMB = [math]::Round($asset.size / 1MB, 1)
@@ -100,6 +119,9 @@ if (-not (Test-Path $exePath)) {
     exit 1
 }
 
+# Save installed version
+$version | Out-File -FilePath (Join-Path $InstallDir "version.txt") -NoNewline
+
 # ── Start Menu shortcut ────────────────────────────────────────────
 Write-Host "  [4/4] Creating Start Menu shortcut..." -ForegroundColor White
 $ws = New-Object -ComObject WScript.Shell
@@ -117,7 +139,11 @@ $shortcut.Save()
 
 # ── Done ────────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "  ✓ PDFTool $version installed successfully!" -ForegroundColor Green
+if ($isUpdate) {
+    Write-Host "  ✓ PDFTool updated to $version!" -ForegroundColor Green
+} else {
+    Write-Host "  ✓ PDFTool $version installed successfully!" -ForegroundColor Green
+}
 Write-Host ""
 Write-Host "  How to launch:" -ForegroundColor White
 Write-Host '    Press Win, type "PDFTool", press Enter' -ForegroundColor DarkCyan
