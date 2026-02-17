@@ -3,12 +3,14 @@ mod compress;
 mod convert;
 mod text_extract;
 mod md_to_pdf;
+mod pdf_to_md;
 
 pub use extract::extract_pages;
 pub use compress::compress_pdf;
 pub use convert::convert_pdf;
 pub use text_extract::extract_text;
 pub use md_to_pdf::md_to_pdf;
+pub use pdf_to_md::pdf_to_md;
 
 use std::path::PathBuf;
 

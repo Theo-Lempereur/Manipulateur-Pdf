@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::path::PathBuf;
-use pdftool_core::{compress_pdf, convert_pdf, extract_pages, extract_text, md_to_pdf, parse_page_range};
+use pdftool_core::{compress_pdf, convert_pdf, extract_pages, extract_text, md_to_pdf, pdf_to_md, parse_page_range};
 
 fn downloads_dir() -> PathBuf {
     dirs::download_dir().unwrap_or_else(|| PathBuf::from("."))
@@ -132,6 +132,23 @@ fn cmd_md_to_pdf(input: String, output_dir: String, output_name: String) -> Resu
     Ok(format!("Markdown converted to PDF: {}", output.display()))
 }
 
+#[tauri::command]
+fn cmd_pdf_to_md(input: String, output_dir: String, output_name: String) -> Result<String, String> {
+    let input = PathBuf::from(&input);
+    let dir = if output_dir.is_empty() { downloads_dir() } else { PathBuf::from(&output_dir) };
+    let name = if output_name.is_empty() {
+        let stem = input.file_stem().unwrap_or_default().to_string_lossy();
+        stem.to_string()
+    } else {
+        strip_extension(&output_name)
+    };
+    let output = dir.join(format!("{}.md", name));
+
+    pdf_to_md(&input, &output).map_err(|e| e.to_string())?;
+
+    Ok(format!("PDF converted to Markdown: {}", output.display()))
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -144,6 +161,7 @@ fn main() {
             cmd_compress,
             cmd_convert,
             cmd_md_to_pdf,
+            cmd_pdf_to_md,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

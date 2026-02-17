@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::process;
 
 use clap::{Parser, Subcommand};
-use pdftool_core::{compress_pdf, convert_pdf, extract_pages, extract_text, md_to_pdf, parse_page_range};
+use pdftool_core::{compress_pdf, convert_pdf, extract_pages, extract_text, md_to_pdf, pdf_to_md, parse_page_range};
 
 #[derive(Parser)]
 #[command(name = "pdftool", about = "CLI tool for PDF manipulation using Ghostscript")]
@@ -54,6 +54,14 @@ enum Commands {
         #[arg(short, long, default_value = "ebook")]
         quality: String,
         /// Output PDF file (default: input_compressed.pdf)
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
+    /// Convert a PDF file to Markdown
+    PdfToMd {
+        /// Input PDF file
+        input: PathBuf,
+        /// Output Markdown file (default: input.md)
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
@@ -142,6 +150,20 @@ fn main() {
                 process::exit(1);
             }
             println!("Converted PDF to {} images in {}", format, output_dir.display());
+        }
+
+        Commands::PdfToMd { input, output } => {
+            let output = output.unwrap_or_else(|| {
+                let stem = input.file_stem().unwrap_or_default().to_string_lossy();
+                let parent = input.parent().unwrap_or_else(|| std::path::Path::new("."));
+                parent.join(format!("{}.md", stem))
+            });
+
+            if let Err(e) = pdf_to_md(&input, &output) {
+                eprintln!("Error: {}", e);
+                process::exit(1);
+            }
+            println!("Converted PDF to Markdown: {}", output.display());
         }
 
         Commands::MdToPdf { input, output } => {

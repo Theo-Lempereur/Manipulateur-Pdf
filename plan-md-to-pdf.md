@@ -25,7 +25,7 @@ Pandoc ne genere pas de PDF seul. Il a besoin d'un **moteur PDF** externe. Optio
 2. `typst` (si installe)
 3. Sinon, erreur claire indiquant quel moteur installer
 
-Le code detectera automatiquement le moteur disponible.
+Le code detéctera automatiquement le moteur disponible.
 
 ---
 
